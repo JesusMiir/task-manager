@@ -9,10 +9,10 @@ export default async function Page() {
     <main>
       <Breadcrumbs
         breadcrumbs={[
-          { label: "Invoices", href: "/dashboard/invoices" },
+          { label: "Tasks", href: "/trello/tasks" },
           {
-            label: "Create Invoice",
-            href: "/dashboard/invoices/create",
+            label: "Create Task",
+            href: "/trello/tasks/create",
             active: true,
           },
         ]}

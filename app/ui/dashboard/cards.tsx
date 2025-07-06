@@ -52,7 +52,8 @@ export function Card({
         {Icon ? <Icon className="h-5 w-5 text-gray-700" /> : null}
         <h3 className="ml-2 text-sm font-medium">{title}</h3>
       </div>
-      <Link href="https://www.google.com">
+
+      {/* <Link href="#">
         <div
           className={`
             truncate rounded-xl bg-white px-4 py-2 text-justify text-2xl border border-gray-200
@@ -61,7 +62,7 @@ export function Card({
           <p>Task</p>
           <small className="text-xs	">User</small>
         </div>
-      </Link>
+      </Link> */}
     </div>
   );
 }

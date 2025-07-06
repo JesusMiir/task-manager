@@ -1,8 +1,8 @@
-import Image from 'next/image';
-import { UpdateInvoice, DeleteInvoice } from '@/app/ui/invoices/buttons';
-import InvoiceStatus from '@/app/ui/invoices/status';
-import { formatDateToLocal, formatCurrency } from '@/app/lib/utils';
-import { fetchFilteredInvoices } from '@/app/lib/data';
+import Image from "next/image";
+import { UpdateInvoice, DeleteInvoice } from "@/app/ui/invoices/buttons";
+import InvoiceStatus from "@/app/ui/invoices/status";
+import { formatDateToLocal, formatCurrency } from "@/app/lib/utils";
+import { fetchFilteredInvoices } from "@/app/lib/data";
 
 export default async function InvoicesTable({
   query,
@@ -58,13 +58,13 @@ export default async function InvoicesTable({
             <thead className="rounded-lg text-left text-sm font-normal">
               <tr>
                 <th scope="col" className="px-4 py-5 font-medium sm:pl-6">
-                  Customer
+                  Title
                 </th>
                 <th scope="col" className="px-3 py-5 font-medium">
-                  Email
+                  User
                 </th>
                 <th scope="col" className="px-3 py-5 font-medium">
-                  Amount
+                  Priority
                 </th>
                 <th scope="col" className="px-3 py-5 font-medium">
                   Date
@@ -77,7 +77,8 @@ export default async function InvoicesTable({
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white">
+
+            {/* <tbody className="bg-white">
               {invoices?.map((invoice) => (
                 <tr
                   key={invoice.id}
@@ -115,7 +116,7 @@ export default async function InvoicesTable({
                   </td>
                 </tr>
               ))}
-            </tbody>
+            </tbody> */}
           </table>
         </div>
       </div>
