@@ -5,8 +5,10 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import postgres from "postgres";
 import { signIn } from "@/auth";
-import { AuthError } from "next-auth";
+import { AuthError, User } from "next-auth";
 import { auth } from "@/auth";
+import { NextResponse } from "next/server";
+import bcrypt from "bcryptjs";
 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: "require" });
 
@@ -52,6 +54,38 @@ const TaskFormSchema = z.object({
 const CreateInvoice = FormSchema.omit({ id: true, date: true });
 
 const CreateTask = TaskFormSchema;
+
+export async function createUser(prevState: any, formData: FormData) {
+  const name = formData.get("name")?.toString();
+  const email = formData.get("email")?.toString();
+  const password = formData.get("password")?.toString();
+
+  if (!name || !email || !password) {
+    return { message: null, errors: { form: "Missing fields" } };
+  }
+
+  try {
+    const existingUser = await sql<User[]>`
+      SELECT * FROM users WHERE email = ${email}
+    `;
+
+    if (existingUser.length > 0) {
+      return { message: null, errors: { email: "User already exists" } };
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    await sql`
+      INSERT INTO users (name, email, password)
+      VALUES (${name}, ${email}, ${hashedPassword})
+    `;
+
+    return { message: "User created successfully!", errors: {} };
+  } catch (error) {
+    console.error("Register error:", error);
+    return { message: null, errors: { form: "Database error" } };
+  }
+}
 
 export async function createTask(prevState: TaskState, formData: FormData) {
   const session = await auth();

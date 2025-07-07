@@ -17,7 +17,6 @@ const links = [
     href: "/trello/tasks",
     icon: DocumentDuplicateIcon,
   },
-  { name: "Users", href: "/trello/users", icon: UserGroupIcon },
 ];
 
 export default function NavLinks() {
