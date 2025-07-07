@@ -7,6 +7,7 @@ import {
 // import { lusitana } from '@/app/ui/fonts';
 import { fetchCardData } from "@/app/lib/data";
 import Link from "next/link";
+import { Task } from "@/app/lib/definitions";
 
 const iconMap = {
   todo: EllipsisHorizontalCircleIcon,
@@ -15,34 +16,16 @@ const iconMap = {
   done: CheckCircleIcon,
 };
 
-export default async function CardWrapper() {
-  const {
-    numberOfInvoices,
-    numberOfCustomers,
-    totalPaidInvoices,
-    totalPendingInvoices,
-  } = await fetchCardData();
-
-  return (
-    <>
-      {/* NOTE: Uncomment this code in Chapter 9 */}
-
-      <Card title="Todo" value={0} type="todo" />
-      <Card title="In Progress" value={0} type="inProgress" />
-      <Card title="Pause" value={0} type="pause" />
-      <Card title="Done" value={0} type="done" />
-    </>
-  );
-}
-
 export function Card({
   title,
   value,
   type,
+  tasks,
 }: {
   title: string;
   value: number | string;
   type: "todo" | "inProgress" | "pause" | "done";
+  tasks: Task[];
 }) {
   const Icon = iconMap[type];
 
@@ -53,16 +36,16 @@ export function Card({
         <h3 className="ml-2 text-sm font-medium">{title}</h3>
       </div>
 
-      {/* <Link href="#">
+      <Link href="#">
         <div
           className={`
             truncate rounded-xl bg-white px-4 py-2 text-justify text-2xl border border-gray-200
             `}
         >
-          <p>Task</p>
+          <p>{value}</p>
           <small className="text-xs	">User</small>
         </div>
-      </Link> */}
+      </Link>
     </div>
   );
 }

@@ -9,9 +9,11 @@ import {
   User,
 } from "./definitions";
 import { formatCurrency } from "./utils";
+import { ReactNode } from "react";
 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: "require" });
 
+/*
 export async function fetchRevenue() {
   const invoiceCountPromise = sql`SELECT COUNT(*) FROM invoices`;
   const customerCountPromise = sql`SELECT COUNT(*) FROM customers`;
@@ -43,6 +45,7 @@ export async function fetchRevenue() {
     throw new Error("Failed to fetch revenue data.");
   }
 }
+*/
 
 export async function fetchLatestInvoices() {
   try {
@@ -156,6 +159,35 @@ export async function fetchInvoicesPages(query: string) {
   }
 }
 
+export async function fetchTasksById(id: string) {
+  try {
+    const data = await sql`
+      SELECT
+        tasks.id,
+        tasks.title,
+        tasks.description,
+        tasks.status,
+        tasks.priority,
+        tasks.due_date,
+        tasks.created_at,
+        users.name AS user_name
+      FROM tasks
+      LEFT JOIN users ON tasks.user_id = users.id
+      WHERE tasks.id = ${id};
+    `;
+
+    const task: any = data.map((task) => ({
+      ...task,
+      amount: task.amount / 100,
+    }));
+    console.log(task);
+    return task[0];
+  } catch (error) {
+    console.error("Database Error:", error);
+    throw new Error("Failed to fetch invoice.");
+  }
+}
+
 export async function fetchInvoiceById(id: string) {
   try {
     const data = await sql<InvoiceForm[]>`
@@ -201,21 +233,21 @@ export async function fetchCustomers() {
 export async function fetchFilteredCustomers(query: string) {
   try {
     const data = await sql<CustomersTableType[]>`
-		SELECT
-		  customers.id,
-		  customers.name,
-		  customers.email,
-		  customers.image_url,
-		  COUNT(invoices.id) AS total_invoices,
-		  SUM(CASE WHEN invoices.status = 'pending' THEN invoices.amount ELSE 0 END) AS total_pending,
-		  SUM(CASE WHEN invoices.status = 'paid' THEN invoices.amount ELSE 0 END) AS total_paid
-		FROM customers
-		LEFT JOIN invoices ON customers.id = invoices.customer_id
-		WHERE
-		  customers.name ILIKE ${`%${query}%`} OR
-        customers.email ILIKE ${`%${query}%`}
-		GROUP BY customers.id, customers.name, customers.email, customers.image_url
-		ORDER BY customers.name ASC
+      SELECT
+        customers.id,
+        customers.name,
+        customers.email,
+        customers.image_url,
+        COUNT(invoices.id) AS total_invoices,
+        SUM(CASE WHEN invoices.status = 'pending' THEN invoices.amount ELSE 0 END) AS total_pending,
+        SUM(CASE WHEN invoices.status = 'paid' THEN invoices.amount ELSE 0 END) AS total_paid
+      FROM customers
+      LEFT JOIN invoices ON customers.id = invoices.customer_id
+      WHERE
+        customers.name ILIKE ${`%${query}%`} OR
+          customers.email ILIKE ${`%${query}%`}
+      GROUP BY customers.id, customers.name, customers.email, customers.image_url
+      ORDER BY customers.name ASC
 	  `;
 
     const customers = data.map((customer) => ({
@@ -232,6 +264,7 @@ export async function fetchFilteredCustomers(query: string) {
 }
 
 type Task = {
+  user_name: ReactNode;
   id: string;
   title: string;
   description?: string;
@@ -243,16 +276,40 @@ type Task = {
 };
 
 export async function fetchTasks(): Promise<Task[]> {
-  const tasks = await sql<Task[]>`SELECT * FROM tasks ORDER BY created_at DESC`;
+  const tasks = await sql<Task[]>`SELECT 
+                                    tasks.id,
+                                    tasks.title,
+                                    tasks.description,
+                                    tasks.status,
+                                    tasks.priority,
+                                    tasks.due_date,
+                                    tasks.created_at,
+                                    users.name AS user_name
+                                  FROM tasks
+                                  LEFT JOIN users ON tasks.user_id = users.id
+                                  ORDER BY tasks.created_at DESC`;
   return tasks;
 }
 
 export async function fetchTasksGroupedByStatus(): Promise<
-  Record<string, Task[]>
+  Record<"todo" | "in_progress" | "pause" | "done", Task[]>
 > {
-  const tasks = await sql<Task[]>`SELECT * FROM tasks`;
+  const tasks = await sql<Task[]>`
+    SELECT 
+      tasks.id,
+      tasks.title,
+      tasks.description,
+      tasks.status,
+      tasks.priority,
+      tasks.due_date,
+      tasks.created_at,
+      users.name AS user_name
+    FROM tasks
+    LEFT JOIN users ON tasks.user_id = users.id
+    ORDER BY tasks.created_at DESC
+  `;
 
-  const grouped: Record<string, Task[]> = {
+  const grouped: Record<"todo" | "in_progress" | "pause" | "done", Task[]> = {
     todo: [],
     in_progress: [],
     pause: [],

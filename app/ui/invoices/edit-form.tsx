@@ -1,128 +1,107 @@
 "use client";
 
-import { CustomerField, InvoiceForm } from "@/app/lib/definitions";
-import {
-  CheckIcon,
-  ClockIcon,
-  CurrencyDollarIcon,
-  UserCircleIcon,
-} from "@heroicons/react/24/outline";
 import Link from "next/link";
-import { Button } from "@/app/ui/button";
-import { updateInvoice, State } from "@/app/lib/actions";
 import { useActionState } from "react";
+import { Task } from "@/app/lib/definitions";
+import { updateTask, TaskState } from "@/app/lib/actions";
+import { Button } from "@/app/ui/button";
 
-export default function EditInvoiceForm({
-  invoice,
-  customers,
-}: {
-  invoice: InvoiceForm;
-  customers: CustomerField[];
-}) {
-  const initialState: State = { message: null, errors: {} };
-  const updateInvoiceWithId = updateInvoice.bind(null, invoice.id);
-  const [state, formAction] = useActionState(updateInvoiceWithId, initialState);
+export default function Form({ task }: { task: Task }) {
+  const initialState: TaskState = { message: null, errors: {} };
+  const updateTaskWithId = updateTask.bind(null, task.id);
+  const [state, formAction] = useActionState(updateTaskWithId, initialState);
 
   return (
-    <form action={updateInvoiceWithId}>
-      <div className="rounded-md bg-gray-50 p-4 md:p-6">
-        {/* Customer Name */}
-        <div className="mb-4">
-          <label htmlFor="customer" className="mb-2 block text-sm font-medium">
-            Choose customer
+    <form action={formAction}>
+      <div className="rounded-md bg-gray-50 p-4 md:p-6 space-y-4">
+        <div>
+          <label htmlFor="title" className="block text-sm font-medium mb-1">
+            Title
           </label>
-          <div className="relative">
-            <select
-              id="customer"
-              name="customerId"
-              className="peer block w-full cursor-pointer rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
-              defaultValue={invoice.customer_id}
-            >
-              <option value="" disabled>
-                Select a customer
-              </option>
-              {customers.map((customer) => (
-                <option key={customer.id} value={customer.id}>
-                  {customer.name}
-                </option>
-              ))}
-            </select>
-            <UserCircleIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500" />
-          </div>
+          <input
+            id="title"
+            name="title"
+            type="text"
+            defaultValue={task.title}
+            required
+            className="w-full rounded-md border border-gray-300 p-2"
+          />
         </div>
 
-        {/* Invoice Amount */}
-        <div className="mb-4">
-          <label htmlFor="amount" className="mb-2 block text-sm font-medium">
-            Choose an amount
+        <div>
+          <label
+            htmlFor="description"
+            className="block text-sm font-medium mb-1"
+          >
+            Description
           </label>
-          <div className="relative mt-2 rounded-md">
-            <div className="relative">
-              <input
-                id="amount"
-                name="amount"
-                type="number"
-                step="0.01"
-                defaultValue={invoice.amount}
-                placeholder="Enter USD amount"
-                className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
-              />
-              <CurrencyDollarIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
-            </div>
-          </div>
+          <textarea
+            id="description"
+            name="description"
+            defaultValue={task.description || ""}
+            className="w-full rounded-md border border-gray-300 p-2"
+          />
         </div>
 
-        {/* Invoice Status */}
-        <fieldset>
-          <legend className="mb-2 block text-sm font-medium">
-            Set the invoice status
-          </legend>
-          <div className="rounded-md border border-gray-200 bg-white px-[14px] py-3">
-            <div className="flex gap-4">
-              <div className="flex items-center">
-                <input
-                  id="pending"
-                  name="status"
-                  type="radio"
-                  value="pending"
-                  defaultChecked={invoice.status === "pending"}
-                  className="h-4 w-4 cursor-pointer border-gray-300 bg-gray-100 text-gray-600 focus:ring-2"
-                />
-                <label
-                  htmlFor="pending"
-                  className="ml-2 flex cursor-pointer items-center gap-1.5 rounded-full bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-600"
-                >
-                  Pending <ClockIcon className="h-4 w-4" />
-                </label>
-              </div>
-              <div className="flex items-center">
-                <input
-                  id="paid"
-                  name="status"
-                  type="radio"
-                  value="paid"
-                  defaultChecked={invoice.status === "paid"}
-                  className="h-4 w-4 cursor-pointer border-gray-300 bg-gray-100 text-gray-600 focus:ring-2"
-                />
-                <label
-                  htmlFor="paid"
-                  className="ml-2 flex cursor-pointer items-center gap-1.5 rounded-full bg-green-500 px-3 py-1.5 text-xs font-medium text-white"
-                >
-                  Paid <CheckIcon className="h-4 w-4" />
-                </label>
-              </div>
-            </div>
-          </div>
-        </fieldset>
+        <div>
+          <label htmlFor="status" className="block text-sm font-medium mb-1">
+            Status
+          </label>
+          <select
+            id="status"
+            name="status"
+            defaultValue={task.status}
+            className="w-full rounded-md border border-gray-300 p-2"
+          >
+            <option value="todo">To Do</option>
+            <option value="in_progress">In Progress</option>
+            <option value="pause">Paused</option>
+            <option value="done">Done</option>
+          </select>
+        </div>
+
+        <div>
+          <label htmlFor="priority" className="block text-sm font-medium mb-1">
+            Priority
+          </label>
+          <select
+            id="priority"
+            name="priority"
+            defaultValue={task.priority}
+            className="w-full rounded-md border border-gray-300 p-2"
+          >
+            <option value="low">Low</option>
+            <option value="medium">Medium</option>
+            <option value="high">High</option>
+          </select>
+        </div>
+
+        <div>
+          <label htmlFor="due_date" className="block text-sm font-medium mb-1">
+            Due Date
+          </label>
+          <input
+            id="due_date"
+            name="due_date"
+            type="date"
+            defaultValue={
+              task.due_date
+                ? new Date(task.due_date).toISOString().split("T")[0]
+                : ""
+            }
+            className="w-full rounded-md border border-gray-300 p-2"
+          />
+        </div>
       </div>
+
       <div className="mt-6 flex justify-end gap-4">
         <Link
-          href="/dashboard/invoices"
-          className="flex h-10 items-center rounded-lg bg-gray-100 px-4 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-200"
+          href="/trello/tasks"
+          className="flex h-10 items-center rounded-lg bg-gray-100 px-4 text-sm font-medium text-gray-600 hover:bg-gray-200"
         >
           Cancel
         </Link>
-        <Button type="submit">Edit Invoice</Button>
+        <Button type="submit">Update Task</Button>
       </div>
     </form>
   );

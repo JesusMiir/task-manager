@@ -188,6 +188,17 @@ export async function deleteInvoice(id: string) {
   }
 }
 
+export async function deleteTask(id: string) {
+  try {
+    await sql`DELETE FROM tasks WHERE id = ${id}`;
+    revalidatePath("/trello/tasks");
+  } catch (error) {
+    // We'll log the error to the console for now
+    console.error(error);
+    throw new Error("Failed to Delete Invoice");
+  }
+}
+
 export async function authenticate(
   prevState: string | undefined,
   formData: FormData
@@ -205,4 +216,53 @@ export async function authenticate(
     }
     throw error;
   }
+}
+
+export async function updateTask(
+  id: string,
+  prevState: TaskState,
+  formData: FormData
+) {
+  const session = await auth();
+  const user = session?.user;
+
+  if (!user || !user.id) {
+    return { message: "Unauthorized. Please log in." };
+  }
+
+  const validatedFields = TaskFormSchema.safeParse({
+    title: formData.get("title"),
+    status: formData.get("status"),
+    description: formData.get("description"),
+    priority: formData.get("priority"),
+    due_date: formData.get("due_date"),
+  });
+
+  if (!validatedFields.success) {
+    return {
+      errors: validatedFields.error.flatten().fieldErrors,
+      message: "Missing or invalid fields. Failed to update task.",
+    };
+  }
+
+  const { title, status, description, priority, due_date } =
+    validatedFields.data;
+
+  try {
+    await sql`
+      UPDATE tasks
+      SET title = ${title},
+          status = ${status},
+          description = ${description ?? ""},
+          priority = ${priority},
+          due_date = ${due_date || null}
+      WHERE id = ${id} AND user_id = ${user.id}
+    `;
+  } catch (error) {
+    console.error(error);
+    return { message: "Database error. Failed to update task." };
+  }
+
+  revalidatePath("/trello/tasks");
+  redirect("/trello/tasks");
 }
