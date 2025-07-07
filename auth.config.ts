@@ -1,7 +1,7 @@
 import type { NextAuthConfig } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { getUser } from "@/app/lib/data"; // Ajusta según tu función real
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 
 export const authConfig = {
   pages: {

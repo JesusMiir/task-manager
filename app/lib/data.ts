@@ -236,8 +236,16 @@ type Task = {
   title: string;
   description?: string;
   status: "todo" | "in_progress" | "pause" | "done";
+  priority: "low" | "medium" | "high";
+  due_date: string | null;
+  created_at: string;
   user_id?: string;
 };
+
+export async function fetchTasks(): Promise<Task[]> {
+  const tasks = await sql<Task[]>`SELECT * FROM tasks ORDER BY created_at DESC`;
+  return tasks;
+}
 
 export async function fetchTasksGroupedByStatus(): Promise<
   Record<string, Task[]>
