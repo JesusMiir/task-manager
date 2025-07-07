@@ -13,7 +13,6 @@ import { ReactNode } from "react";
 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: "require" });
 
-/*
 export async function fetchRevenue() {
   const invoiceCountPromise = sql`SELECT COUNT(*) FROM invoices`;
   const customerCountPromise = sql`SELECT COUNT(*) FROM customers`;
@@ -45,7 +44,6 @@ export async function fetchRevenue() {
     throw new Error("Failed to fetch revenue data.");
   }
 }
-*/
 
 export async function fetchLatestInvoices() {
   try {

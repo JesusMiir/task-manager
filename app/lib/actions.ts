@@ -36,11 +36,11 @@ export type State = {
 };
 
 export type TaskState = {
-  errors?: {
-    title?: string[];
-    status?: string[];
+  message: string | null;
+  errors: {
+    email?: string;
+    form?: string;
   };
-  message?: string | null;
 };
 
 const TaskFormSchema = z.object({
@@ -55,7 +55,7 @@ const CreateInvoice = FormSchema.omit({ id: true, date: true });
 
 const CreateTask = TaskFormSchema;
 
-export async function createUser(prevState: any, formData: FormData) {
+export async function createUser(prevState: TaskState, formData: FormData) {
   const name = formData.get("name")?.toString();
   const email = formData.get("email")?.toString();
   const password = formData.get("password")?.toString();

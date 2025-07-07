@@ -5,17 +5,27 @@ import Link from "next/link";
 import { useEffect } from "react";
 import { createUser } from "@/app/lib/actions";
 
-const initialState = { message: null, errors: {} };
+type TaskState = {
+  message: string | null;
+  errors: {
+    email?: string;
+    form?: string;
+  };
+};
+
+const initialState: TaskState = { message: null, errors: {} };
 
 export default function RegisterPage() {
-  const [state, formAction] = useActionState(createUser, initialState);
+  const [state, formAction] = useActionState<TaskState, FormData>(
+    createUser,
+    initialState
+  );
 
   useEffect(() => {
     if (state.message) {
-      // Redirigir manualmente al login después de crear usuario
       setTimeout(() => {
         window.location.href = "/login";
-      }, 1000); // pequeña pausa para que el usuario vea el mensaje
+      }, 1000);
     }
   }, [state.message]);
 
