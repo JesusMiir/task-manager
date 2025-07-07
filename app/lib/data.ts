@@ -10,6 +10,8 @@ import {
 } from "./definitions";
 import { formatCurrency } from "./utils";
 import { ReactNode } from "react";
+import { NextResponse } from "next/server";
+import bcrypt from "bcryptjs";
 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: "require" });
 
@@ -332,5 +334,41 @@ export async function getUser(email: string): Promise<User | undefined> {
   } catch (error) {
     console.error("Error fetching user:", error);
     return undefined;
+  }
+}
+
+export async function register(req: Request) {
+  const formData = await req.formData();
+  const name = formData.get("name")?.toString();
+  const email = formData.get("email")?.toString();
+  const password = formData.get("password")?.toString();
+
+  if (!name || !email || !password) {
+    return NextResponse.json({ error: "Missing fields" }, { status: 400 });
+  }
+
+  try {
+    // Check if user already exists
+    const existingUser = await sql<
+      User[]
+    >`SELECT * FROM users WHERE email = ${email}`;
+    if (existingUser.length > 0) {
+      return NextResponse.json(
+        { error: "User already exists" },
+        { status: 400 }
+      );
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    await sql`
+      INSERT INTO users (name, email, password)
+      VALUES (${name}, ${email}, ${hashedPassword})
+    `;
+
+    return NextResponse.redirect(new URL("/login", req.url));
+  } catch (error) {
+    console.error("Register error:", error);
+    return NextResponse.json({ error: "Database error" }, { status: 500 });
   }
 }

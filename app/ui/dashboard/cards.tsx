@@ -25,7 +25,7 @@ export function Card({
   title: string;
   value: number | string;
   type: "todo" | "inProgress" | "pause" | "done";
-  tasks?: Task[];
+  tasks?: Task[] | any;
 }) {
   const Icon = iconMap[type];
 
@@ -37,16 +37,20 @@ export function Card({
       </div>
 
       <div className="space-y-2 px-4 pb-4">
-        {tasks.map((task) => (
-          <Link
-            key={task.id}
-            href={`/trello/tasks/${task.id}/edit`}
-            className="block rounded bg-white px-3 py-2 shadow hover:bg-gray-50 transition"
-          >
-            <p className="font-medium text-sm">{task.title}1 </p>
-            <p className="text-gray-500 text-xs">{task.user_name}</p>
-          </Link>
-        ))}
+        {Array.isArray(tasks) && tasks.length > 0 ? (
+          tasks.map((task: Task) => (
+            <Link
+              key={task.id}
+              href={`/trello/tasks/${task.id}/edit`}
+              className="block rounded bg-white px-3 py-2 shadow hover:bg-gray-50 transition"
+            >
+              <p className="font-medium text-sm">{task.title}</p>
+              <p className="text-gray-500 text-xs">{task.user_name}</p>
+            </Link>
+          ))
+        ) : (
+          <p className="text-sm text-gray-500 px-4 pb-2">No tasks</p>
+        )}
       </div>
     </div>
   );
