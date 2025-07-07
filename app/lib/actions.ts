@@ -32,7 +32,55 @@ export type State = {
   message?: string | null;
 };
 
+export type TaskState = {
+  errors?: {
+    title?: string[];
+    status?: string[];
+  };
+  message?: string | null;
+};
+
+const TaskFormSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  status: z.enum(["todo", "in_progress", "pause", "done"]),
+  description: z.string().optional(),
+});
+
 const CreateInvoice = FormSchema.omit({ id: true, date: true });
+
+const CreateTask = TaskFormSchema;
+
+export async function createTask(prevState: TaskState, formData: FormData) {
+  const validatedFields = CreateTask.safeParse({
+    title: formData.get("title"),
+    status: formData.get("status"),
+    description: formData.get("description"),
+  });
+
+  if (!validatedFields.success) {
+    return {
+      errors: validatedFields.error.flatten().fieldErrors,
+      message: "Missing or invalid fields. Failed to create task.",
+    };
+  }
+
+  const { title, status, description } = validatedFields.data;
+
+  try {
+    await sql`
+      INSERT INTO tasks (title, status, description)
+      VALUES (${title}, ${status}, ${description ?? ""})
+    `;
+  } catch (error) {
+    console.error(error);
+    return {
+      message: "Database error. Failed to create task.",
+    };
+  }
+
+  revalidatePath("/trello/tasks");
+  redirect("/trello/tasks");
+}
 
 export async function createInvoice(prevState: State, formData: FormData) {
   const validatedFields = CreateInvoice.safeParse({
