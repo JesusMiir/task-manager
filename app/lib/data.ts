@@ -6,6 +6,7 @@ import {
   InvoicesTable,
   LatestInvoiceRaw,
   Revenue,
+  User,
 } from "./definitions";
 import { formatCurrency } from "./utils";
 
@@ -227,5 +228,44 @@ export async function fetchFilteredCustomers(query: string) {
   } catch (err) {
     console.error("Database Error:", err);
     throw new Error("Failed to fetch customer table.");
+  }
+}
+
+type Task = {
+  id: string;
+  title: string;
+  description?: string;
+  status: "todo" | "in_progress" | "pause" | "done";
+  user_id?: string;
+};
+
+export async function fetchTasksGroupedByStatus(): Promise<
+  Record<string, Task[]>
+> {
+  const tasks = await sql<Task[]>`SELECT * FROM tasks`;
+
+  const grouped: Record<string, Task[]> = {
+    todo: [],
+    in_progress: [],
+    pause: [],
+    done: [],
+  };
+
+  for (const task of tasks) {
+    grouped[task.status].push(task);
+  }
+
+  return grouped;
+}
+
+export async function getUser(email: string): Promise<User | undefined> {
+  try {
+    const result = await sql<User[]>`
+      SELECT * FROM users WHERE email = ${email}
+    `;
+    return result[0];
+  } catch (error) {
+    console.error("Error fetching user:", error);
+    return undefined;
   }
 }

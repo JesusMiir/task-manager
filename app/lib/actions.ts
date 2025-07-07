@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import postgres from "postgres";
 import { signIn } from "@/auth";
 import { AuthError } from "next-auth";
+import { auth } from "@/auth";
 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: "require" });
 
@@ -42,8 +43,10 @@ export type TaskState = {
 
 const TaskFormSchema = z.object({
   title: z.string().min(1, "Title is required"),
-  status: z.enum(["todo", "in_progress", "pause", "done"]),
   description: z.string().optional(),
+  status: z.enum(["todo", "in_progress", "pause", "done"]),
+  priority: z.enum(["low", "medium", "high"]).default("medium"),
+  due_date: z.string().optional(),
 });
 
 const CreateInvoice = FormSchema.omit({ id: true, date: true });
@@ -51,11 +54,25 @@ const CreateInvoice = FormSchema.omit({ id: true, date: true });
 const CreateTask = TaskFormSchema;
 
 export async function createTask(prevState: TaskState, formData: FormData) {
+  const session = await auth();
+  const user = session?.user;
+
+  console.log(user);
+
+  if (!user?.id) {
+    console.error("user is undefined. Cannot create task.");
+    return { message: "Unauthorized. Please log in." };
+  }
+
   const validatedFields = CreateTask.safeParse({
     title: formData.get("title"),
     status: formData.get("status"),
     description: formData.get("description"),
+    priority: formData.get("priority"),
+    due_date: formData.get("due_date"),
   });
+
+  console.log(validatedFields);
 
   if (!validatedFields.success) {
     return {
@@ -64,54 +81,64 @@ export async function createTask(prevState: TaskState, formData: FormData) {
     };
   }
 
-  const { title, status, description } = validatedFields.data;
+  const { title, status, description, priority, due_date } =
+    validatedFields.data;
 
   try {
     await sql`
-      INSERT INTO tasks (title, status, description)
-      VALUES (${title}, ${status}, ${description ?? ""})
+      INSERT INTO tasks (title, status, description, priority, due_date, user_id)
+      VALUES (${title}, ${status}, ${description ?? ""}, ${priority}, ${
+      due_date || null
+    }, ${user.id})
     `;
   } catch (error) {
     console.error(error);
-    return {
-      message: "Database error. Failed to create task.",
-    };
+    return { message: "Database error. Failed to create task." };
   }
+
+  console.log("🚀 Creating task with:", {
+    title,
+    status,
+    description,
+    priority,
+    due_date,
+    user_id: user.id,
+  });
 
   revalidatePath("/trello/tasks");
   redirect("/trello/tasks");
 }
 
-export async function createInvoice(prevState: State, formData: FormData) {
-  const validatedFields = CreateInvoice.safeParse({
-    customerId: formData.get("customerId"),
-    amount: formData.get("amount"),
-    status: formData.get("status"),
-  });
+// export async function createInvoice(prevState: State, formData: FormData) {
+//   const validatedFields = CreateInvoice.safeParse({
+//     customerId: formData.get("customerId"),
+//     amount: formData.get("amount"),
+//     status: formData.get("status"),
+//   });
 
-  if (!validatedFields.success) {
-    return {
-      errors: validatedFields.error.flatten().fieldErrors,
-      message: "Missing Fields. Failed to Create Invoice.",
-    };
-  }
+//   if (!validatedFields.success) {
+//     return {
+//       errors: validatedFields.error.flatten().fieldErrors,
+//       message: "Missing Fields. Failed to Create Invoice.",
+//     };
+//   }
 
-  const { customerId, amount, status } = validatedFields.data;
-  const amountInCents = amount * 100;
-  const date = new Date().toISOString().split("T")[0];
+//   const { customerId, amount, status } = validatedFields.data;
+//   const amountInCents = amount * 100;
+//   const date = new Date().toISOString().split("T")[0];
 
-  try {
-    await sql`
-        INSERT INTO invoices (customer_id, amount, status, date)
-        VALUES (${customerId}, ${amountInCents}, ${status}, ${date})
-      `;
-  } catch (error) {
-    console.error(error);
-  }
+//   try {
+//     await sql`
+//         INSERT INTO invoices (customer_id, amount, status, date)
+//         VALUES (${customerId}, ${amountInCents}, ${status}, ${date})
+//       `;
+//   } catch (error) {
+//     console.error(error);
+//   }
 
-  revalidatePath("/dashboard/invoices");
-  redirect("/dashboard/invoices");
-}
+//   revalidatePath("/dashboard/invoices");
+//   redirect("/dashboard/invoices");
+// }
 
 const UpdateInvoice = FormSchema.omit({ id: true, date: true });
 
