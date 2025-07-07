@@ -15,6 +15,7 @@ export default function Form({ task }: { task: Task }) {
     <form>
       <div className="rounded-md bg-gray-50 p-4 md:p-6 space-y-4">
         <div>
+          <input type="hidden" name="taskId" value={task.id} />
           <label htmlFor="title" className="block text-sm font-medium mb-1">
             Title
           </label>
