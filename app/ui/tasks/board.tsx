@@ -16,9 +16,10 @@ export default async function TrelloBoard() {
       {columns.map((col) => (
         <div key={col.key} className="w-1/4 p-2 bg-gray-50 rounded">
           <h2 className="text-lg font-semibold mb-2">{col.label}</h2>
-          {tasks[col.key].map((task) => (
+
+          {/* {tasks[col.key].map((task) => (
             <Card key={task.id} task={task} />
-          ))}
+          ))} */}
         </div>
       ))}
     </div>

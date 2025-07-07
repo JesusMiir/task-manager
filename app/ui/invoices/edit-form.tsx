@@ -9,10 +9,10 @@ import { Button } from "@/app/ui/button";
 export default function Form({ task }: { task: Task }) {
   const initialState: TaskState = { message: null, errors: {} };
   const updateTaskWithId = updateTask.bind(null, task.id);
-  const [state, formAction] = useActionState(updateTaskWithId, initialState);
+  // const [state, formAction] = useActionState(updateTaskWithId, initialState);
 
   return (
-    <form action={formAction}>
+    <form>
       <div className="rounded-md bg-gray-50 p-4 md:p-6 space-y-4">
         <div>
           <label htmlFor="title" className="block text-sm font-medium mb-1">

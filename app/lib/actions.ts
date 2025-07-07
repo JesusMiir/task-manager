@@ -40,6 +40,10 @@ export type TaskState = {
   errors: {
     email?: string;
     form?: string;
+    description?: string;
+    assigned_to?: string;
+    priority?: string;
+    due_date?: string;
   };
 };
 
@@ -95,7 +99,7 @@ export async function createTask(prevState: TaskState, formData: FormData) {
 
   if (!user?.id) {
     console.error("user is undefined. Cannot create task.");
-    return { message: "Unauthorized. Please log in." };
+    return { message: "Unauthorized. Please log in.", errors: {} };
   }
 
   const validatedFields = CreateTask.safeParse({
@@ -127,7 +131,7 @@ export async function createTask(prevState: TaskState, formData: FormData) {
     `;
   } catch (error) {
     console.error(error);
-    return { message: "Database error. Failed to create task." };
+    return { message: "Database error. Failed to create task.", errors: {} };
   }
 
   console.log("🚀 Creating task with:", {
@@ -140,7 +144,11 @@ export async function createTask(prevState: TaskState, formData: FormData) {
   });
 
   revalidatePath("/trello/tasks");
-  redirect("/trello/tasks");
+
+  return {
+    message: "Task created successfully!",
+    errors: {},
+  };
 }
 
 // export async function createInvoice(prevState: State, formData: FormData) {

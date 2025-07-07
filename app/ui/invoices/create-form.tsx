@@ -9,15 +9,36 @@ import {
   CheckCircleIcon,
 } from "@heroicons/react/24/outline";
 import { Button } from "@/app/ui/button";
-import { createTask, TaskState } from "@/app/lib/actions";
+import { createTask } from "@/app/lib/actions";
 import { CustomerField } from "@/app/lib/definitions";
 
+export type TaskState = {
+  message: string | null;
+  errors: {
+    title?: string[];
+    status?: string[];
+    description?: string[];
+    priority?: string[];
+    due_date?: string[];
+  };
+};
+
 export default function Form({ customers }: { customers: CustomerField[] }) {
-  const initialState: TaskState = { message: null, errors: {} };
-  const [state, formAction] = useActionState(createTask, initialState);
+  const initialState: TaskState = {
+    message: null,
+    errors: {},
+  };
+
+  const stat = null;
+  /*
+  const [state, formAction] = useActionState<TaskState, FormData>(
+    createTask,
+    initialState
+  );
+  */
 
   return (
-    <form action={formAction}>
+    <form>
       <div className="rounded-md bg-gray-50 p-4 md:p-6">
         {/* Title */}
         <div className="mb-4">
@@ -32,11 +53,13 @@ export default function Form({ customers }: { customers: CustomerField[] }) {
             className="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
             placeholder="Enter task title"
           />
-          {state.errors?.title && (
+
+          {/* {state.errors?.title && (
             <p className="mt-1 text-sm text-red-500">
               {state.errors.title.join(", ")}
             </p>
           )}
+           */}
         </div>
 
         {/* Description */}
@@ -94,11 +117,11 @@ export default function Form({ customers }: { customers: CustomerField[] }) {
               </label>
             ))}
           </div>
-          {state.errors?.status && (
+          {/* {state.errors?.status && (
             <p className="mt-1 text-sm text-red-500">
               {state.errors.status.join(", ")}
             </p>
-          )}
+          )} */}
         </fieldset>
 
         {/* Priority */}
