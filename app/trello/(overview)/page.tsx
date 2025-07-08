@@ -12,6 +12,8 @@ import {
 import { fetchTasksGroupedByStatus } from "@/app/lib/data";
 import { Task } from "@/app/lib/definitions";
 
+export const dynamic = "force-dynamic";
+
 export default async function Page() {
   // const revenue = await fetchRevenue();
   /*
