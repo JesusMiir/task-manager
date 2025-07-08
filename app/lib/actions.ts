@@ -135,11 +135,6 @@ export async function createTask(prevState: TaskState, formData: FormData) {
     user_id: user.id,
   });
 
-  return {
-    message: "Task created successfully!",
-    errors: {},
-  } as TaskState;
-
   revalidatePath("/trello/tasks");
   redirect("/trello/tasks");
 }
