@@ -11,17 +11,7 @@ import {
 import { Button } from "@/app/ui/button";
 import { createTask } from "@/app/lib/actions";
 import { CustomerField } from "@/app/lib/definitions";
-
-export type TaskState = {
-  message: string | null;
-  errors: {
-    title?: string[];
-    status?: string[];
-    description?: string[];
-    priority?: string[];
-    due_date?: string[];
-  };
-};
+import { TaskState } from "@/app/lib/definitions";
 
 export default function Form({ customers }: { customers: CustomerField[] }) {
   const initialState: TaskState = {
@@ -30,15 +20,14 @@ export default function Form({ customers }: { customers: CustomerField[] }) {
   };
 
   const stat = null;
-  /*
+
   const [state, formAction] = useActionState<TaskState, FormData>(
     createTask,
     initialState
   );
-  */
 
   return (
-    <form>
+    <form action={formAction}>
       <div className="rounded-md bg-gray-50 p-4 md:p-6">
         {/* Title */}
         <div className="mb-4">

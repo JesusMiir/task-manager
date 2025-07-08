@@ -98,3 +98,15 @@ export type InvoiceForm = {
   amount: number;
   status: "pending" | "paid";
 };
+
+export type TaskState = {
+  message: string | null;
+  errors: {
+    email?: string;
+    form?: string;
+    description?: string;
+    assigned_to?: string;
+    priority?: string;
+    due_date?: string;
+  };
+};

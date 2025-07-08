@@ -3,16 +3,17 @@
 import Link from "next/link";
 import { useActionState } from "react";
 import { Task } from "@/app/lib/definitions";
-import { updateTask, TaskState } from "@/app/lib/actions";
+import { updateTask } from "@/app/lib/actions";
+import { TaskState } from "@/app/lib/definitions";
 import { Button } from "@/app/ui/button";
 
 export default function Form({ task }: { task: Task }) {
   const initialState: TaskState = { message: null, errors: {} };
   const updateTaskWithId = updateTask.bind(null, task.id);
-  // const [state, formAction] = useActionState(updateTaskWithId, initialState);
+  const [state, formAction] = useActionState(updateTaskWithId, initialState);
 
   return (
-    <form>
+    <form action={formAction}>
       <div className="rounded-md bg-gray-50 p-4 md:p-6 space-y-4">
         <div>
           <input type="hidden" name="taskId" value={task.id} />

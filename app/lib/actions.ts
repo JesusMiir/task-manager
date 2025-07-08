@@ -9,6 +9,7 @@ import { AuthError, User } from "next-auth";
 import { auth } from "@/auth";
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
+import { TaskState } from "./definitions";
 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: "require" });
 
@@ -33,18 +34,6 @@ export type State = {
     status?: string[];
   };
   message?: string | null;
-};
-
-export type TaskState = {
-  message: string | null;
-  errors: {
-    email?: string;
-    form?: string;
-    description?: string;
-    assigned_to?: string;
-    priority?: string;
-    due_date?: string;
-  };
 };
 
 const TaskFormSchema = z.object({
@@ -99,7 +88,7 @@ export async function createTask(prevState: TaskState, formData: FormData) {
 
   if (!user?.id) {
     console.error("user is undefined. Cannot create task.");
-    return { message: "Unauthorized. Please log in.", errors: {} };
+    return { message: "Unauthorized. Please log in.", errors: {} } as TaskState;
   }
 
   const validatedFields = CreateTask.safeParse({
@@ -116,7 +105,7 @@ export async function createTask(prevState: TaskState, formData: FormData) {
     return {
       errors: validatedFields.error.flatten().fieldErrors,
       message: "Missing or invalid fields. Failed to create task.",
-    };
+    } as TaskState;
   }
 
   const { title, status, description, priority, due_date } =
@@ -131,7 +120,10 @@ export async function createTask(prevState: TaskState, formData: FormData) {
     `;
   } catch (error) {
     console.error(error);
-    return { message: "Database error. Failed to create task.", errors: {} };
+    return {
+      message: "Database error. Failed to create task.",
+      errors: {},
+    } as TaskState;
   }
 
   console.log("🚀 Creating task with:", {
@@ -143,12 +135,13 @@ export async function createTask(prevState: TaskState, formData: FormData) {
     user_id: user.id,
   });
 
-  revalidatePath("/trello/tasks");
-
   return {
     message: "Task created successfully!",
     errors: {},
-  };
+  } as TaskState;
+
+  revalidatePath("/trello/tasks");
+  redirect("/trello/tasks");
 }
 
 // export async function createInvoice(prevState: State, formData: FormData) {
@@ -269,7 +262,7 @@ export async function updateTask(
   const user = session?.user;
 
   if (!user || !user.id) {
-    return { message: "Unauthorized. Please log in." };
+    return { message: "Unauthorized. Please log in." } as TaskState;
   }
 
   const validatedFields = TaskFormSchema.safeParse({
@@ -284,7 +277,7 @@ export async function updateTask(
     return {
       errors: validatedFields.error.flatten().fieldErrors,
       message: "Missing or invalid fields. Failed to update task.",
-    };
+    } as TaskState;
   }
 
   const { title, status, description, priority, due_date } =
@@ -302,7 +295,7 @@ export async function updateTask(
     `;
   } catch (error) {
     console.error(error);
-    return { message: "Database error. Failed to update task." };
+    return { message: "Database error. Failed to update task." } as TaskState;
   }
 
   revalidatePath("/trello/tasks");
