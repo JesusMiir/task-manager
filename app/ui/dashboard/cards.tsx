@@ -8,6 +8,13 @@ import {
 import { fetchCardData } from "@/app/lib/data";
 import Link from "next/link";
 import { Task } from "@/app/lib/definitions";
+import { auth } from "@/auth";
+
+/*
+  {isLoggedIn && (
+    <LogOutButton />
+  )}
+*/
 
 const iconMap = {
   todo: EllipsisHorizontalCircleIcon,
@@ -16,7 +23,7 @@ const iconMap = {
   done: CheckCircleIcon,
 };
 
-export function Card({
+export async function Card({
   title,
   value,
   type,
@@ -28,6 +35,8 @@ export function Card({
   tasks?: Task[] | any;
 }) {
   const Icon = iconMap[type];
+  const session = await auth();
+  const user = session?.user;
 
   return (
     <div className="rounded-xl bg-gray-50 p-2 shadow-sm">
@@ -41,7 +50,11 @@ export function Card({
           tasks.map((task: Task) => (
             <Link
               key={task.id}
-              href={`/trello/tasks/${task.id}/edit`}
+              href={
+                user?.name == task.user_name
+                  ? `/trello/tasks/${task.id}/edit`
+                  : `/trello/tasks/${task.id}`
+              }
               className="block rounded bg-white px-3 py-2 shadow hover:bg-gray-50 transition"
             >
               <p className="font-medium text-sm">{task.title}</p>

@@ -219,13 +219,22 @@ export async function deleteInvoice(id: string) {
 }
 
 export async function deleteTask(id: string) {
+  const session = await auth();
+  const user = session?.user;
+
+  if (!user || !user.id) {
+    throw new Error("Failed to Delete task");
+  }
+
   try {
-    await sql`DELETE FROM tasks WHERE id = ${id}`;
+    await sql`DELETE FROM tasks WHERE id = ${id} AND user_name = ${
+      user?.name || ""
+    }`;
     revalidatePath("/trello/tasks");
   } catch (error) {
     // We'll log the error to the console for now
     console.error(error);
-    throw new Error("Failed to Delete Invoice");
+    throw new Error("Failed to Delete task");
   }
 }
 
