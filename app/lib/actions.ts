@@ -302,6 +302,6 @@ export async function updateTask(
     return { message: "Database error. Failed to update task." } as TaskState;
   }
 
-  revalidatePath("/trello/tasks");
-  redirect("/trello/tasks");
+  revalidatePath("/trello");
+  redirect("/trello");
 }

@@ -16,7 +16,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
     <main>
       <Breadcrumbs
         breadcrumbs={[
-          { label: "Tasks", href: "/trello/tasks" },
+          { label: "Trello", href: "/trello" },
           {
             label: "Edit Tasks",
             href: `/trello/tasks/${id}/edit`,

@@ -98,7 +98,7 @@ export default function Form({ task }: { task: Task }) {
 
       <div className="mt-6 flex justify-end gap-4">
         <Link
-          href="/trello/tasks"
+          href="/trello"
           className="flex h-10 items-center rounded-lg bg-gray-100 px-4 text-sm font-medium text-gray-600 hover:bg-gray-200"
         >
           Cancel
