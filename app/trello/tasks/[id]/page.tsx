@@ -2,7 +2,7 @@ import Breadcrumbs from "@/app/ui/invoices/breadcrumbs";
 import { fetchTasksById } from "@/app/lib/data";
 import { notFound } from "next/navigation";
 
-export default async function Page({ params }: { params: { id: string } }) {
+export default async function Page({ params }: { params: any }) {
   const task = await fetchTasksById(params.id);
 
   if (!task) {
